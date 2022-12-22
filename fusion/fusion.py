@@ -501,7 +501,8 @@ class Fusion:
             dataset (str): A dataset identifier
             dt_str (str, optional): Either a single date or a range identified by a start or end date,
                 or both separated with a ":". Defaults to 'latest' which will return the most recent
-                instance of the dataset.
+                instance of the dataset. If 'sample' is passed for this then dataset_format will be 
+                overridden to 'csv' and it will download the sample file if available.
             dataset_format (str, optional): The file format, e.g. CSV or Parquet. Defaults to 'parquet'.
             catalog (str, optional): A catalog identifier. Defaults to 'common'.
             n_par (int, optional): Specify how many distributions to download in parallel.
@@ -518,14 +519,22 @@ class Fusion:
         """
         catalog = self.__use_catalog(catalog)
 
+        if dt_str == 'sample':
+            dataset_format = 'csv'
+
         n_par = cpu_count(n_par)
-        required_series = self._resolve_distro_tuples(dataset, dt_str, dataset_format, catalog)
 
         if not download_folder:
             download_folder = self.download_folder
 
         if not self.fs.exists(download_folder):
             self.fs.mkdir(download_folder, create_parents=True)
+
+        if dt_str == 'sample':
+            required_series = [(catalog, dataset, 'sample', dataset_format)]
+        else:
+            required_series = self._resolve_distro_tuples(dataset, dt_str, dataset_format, catalog)
+        
         download_spec = [
             {
                 "credentials": self.credentials,
@@ -593,6 +602,9 @@ class Fusion:
                 If multiple dataset instances are retrieved then these are concatenated first.
         """
         catalog = self.__use_catalog(catalog)
+
+        if dt_str == 'sample':
+            dataset_format = 'csv'
 
         n_par = cpu_count(n_par)
         if not download_folder:

@@ -44,7 +44,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip 
-          pip install poetry tox tox-gh-actions _internal --find-links dist --force-reinstall
+          pip install poetry tox tox-gh-actions 
+          pip install _internal --find-links dist --force-reinstall
 
       - name: Setup doc deploy git user # required for tox testing on mike
         run: |

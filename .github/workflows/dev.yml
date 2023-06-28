@@ -15,31 +15,36 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "test"
-  test:
-    # The type of runner that the job will run on
+  linux:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-versions: [3.9]
-        os: [ubuntu-20.04]
-    runs-on: ${{ matrix.os }}
+        target: [x86_64, x86, armv7]
+
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_TOKEN }}
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
 
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install poetry tox tox-gh-actions
+          python -m pip install --upgrade pip 
+          pip install poetry tox tox-gh-actions _internal --find-links dist --force-reinstall
 
       - name: Setup doc deploy git user # required for tox testing on mike
         run: |

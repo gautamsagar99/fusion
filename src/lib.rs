@@ -17,6 +17,80 @@ use tokio_util::codec::{BytesCodec, FramedRead};
 const BASE_WAIT_TIME: usize = 300;
 const MAX_WAIT_TIME: usize = 10_000;
 
+/*
+        client_id: str = None,
+        client_secret: str = None,
+        username: str = None,
+        password: str = None,
+        resource: str = None,
+        auth_url: str = None,
+        bearer_token: str = None,
+        bearer_token_expiry: datetime.datetime = None,
+        is_bearer_token_expirable=None,
+        proxies={},
+        grant_type: str = "client_credentials",
+
+ */
+#[derive(Clone, Debug)]
+#[pyclass]
+pub struct FusionCredentials {
+    #[pyo3(get)]
+    client_id: Option<String>,
+    #[pyo3(get)]
+    client_secret: Option<String>,
+    #[pyo3(get)]
+    username: Option<String>,
+    #[pyo3(get)]
+    password: Option<String>,
+    #[pyo3(get)]
+    resource: Option<String>,
+    #[pyo3(get)]
+    auth_url: Option<String>,
+    #[pyo3(get)]
+    bearer_token: Option<String>,
+    // Simplifying datetime to u64 timestamp for the example.
+    #[pyo3(get)]
+    bearer_token_expiry: Option<u64>,
+    #[pyo3(get)]
+    is_bearer_token_expirable: Option<bool>,
+    #[pyo3(get)]
+    proxies: Option<HashMap<String, String>>,
+    #[pyo3(get)]
+    grant_type: Option<String>,
+}
+
+#[pymethods]
+impl FusionCredentials {
+    #[new]
+    fn new(
+        client_id: Option<String>,
+        client_secret: Option<String>,
+        username: Option<String>,
+        password: Option<String>,
+        resource: Option<String>,
+        auth_url: Option<String>,
+        bearer_token: Option<String>,
+        bearer_token_expiry: Option<u64>,
+        is_bearer_token_expirable: Option<bool>,
+        proxies: Option<HashMap<String, String>>,
+        grant_type: Option<String>,
+    ) -> Self {
+        FusionCredentials {
+            client_id,
+            client_secret,
+            username,
+            password,
+            resource,
+            auth_url,
+            bearer_token,
+            bearer_token_expiry,
+            is_bearer_token_expirable,
+            proxies,
+            grant_type,
+        }
+    }
+}
+
 /// max_files: Number of open file handles, which determines the maximum number of parallel downloads
 /// parallel_failures:  Number of maximum failures of different chunks in parallel (cannot exceed max_files)
 /// max_retries: Number of maximum attempts per chunk. (Retries are exponentially backed off + jitter)
@@ -24,12 +98,13 @@ const MAX_WAIT_TIME: usize = 10_000;
 /// The number of threads can be tuned by the environment variable `TOKIO_WORKER_THREADS` as documented in
 /// https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.worker_threads
 #[pyfunction]
-#[pyo3(signature = (url, filename, max_files, chunk_size, parallel_failures=0, max_retries=0, headers=None))]
+#[pyo3(signature = (url, filename, max_files, chunk_size, fusion_creds, parallel_failures=0, max_retries=0, headers=None))]
 fn download(
     url: String,
     filename: String,
     max_files: usize,
     chunk_size: usize,
+    fusion_creds: FusionCredentials,
     parallel_failures: usize,
     max_retries: usize,
     headers: Option<HashMap<String, String>>,
@@ -56,6 +131,7 @@ fn download(
                 chunk_size,
                 parallel_failures,
                 max_retries,
+                fusion_creds,
                 headers,
             )
             .await
@@ -141,8 +217,10 @@ async fn download_async(
     chunk_size: usize,
     parallel_failures: usize,
     max_retries: usize,
+    fusion_creds: FusionCredentials,
     input_headers: Option<HashMap<String, String>>,
 ) -> PyResult<()> {
+    println!("{:?}", fusion_creds);
     let client = reqwest::Client::new();
 
     let mut headers = HeaderMap::new();
@@ -402,5 +480,6 @@ async fn upload_chunk(
 fn _internal(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(download, m)?)?;
     m.add_function(wrap_pyfunction!(multipart_upload, m)?)?;
+    m.add_class::<FusionCredentials>()?;
     Ok(())
 }

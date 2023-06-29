@@ -4,10 +4,10 @@ import base64
 import hashlib
 import json
 import logging
-import warnings
 import os
 import sys
 import time
+import warnings
 from os.path import relpath
 from pathlib import Path
 
@@ -19,15 +19,15 @@ from tqdm import tqdm
 from .utils import (
     cpu_count,
     distribution_to_filename,
+    is_dataset_raw,
     path_to_url,
     upload_files,
     validate_file_names,
-    is_dataset_raw,
 )
 
 logger = logging.getLogger(__name__)
 VERBOSE_LVL = 25
-DEFAULT_CHUNK_SIZE = 2 ** 16
+DEFAULT_CHUNK_SIZE = 2**16
 
 
 def _get_loop(df, show_progress):
@@ -87,7 +87,7 @@ def _upload(fs_fusion, fs_local, df, n_par, show_progress=True):
     return res
 
 
-def _generate_sha256_token(path, fs, chunk_size=5 * 2 ** 20):
+def _generate_sha256_token(path, fs, chunk_size=5 * 2**20):
     hash_sha256 = hashlib.sha256()
     chunk_count = 0
     with fs.open(path, "rb") as file:

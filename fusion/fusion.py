@@ -1,39 +1,40 @@
 """Main Fusion module."""
 
+import json as js
 import logging
 import sys
 import warnings
 from pathlib import Path
 from typing import Dict, List, Union
 from zipfile import ZipFile
-import json as js
+
 import pandas as pd
+import pyarrow as pa
 import requests
 from joblib import Parallel, delayed
 from tabulate import tabulate
 from tqdm import tqdm
-import pyarrow as pa
 
 from .authentication import FusionCredentials, get_default_fs
 from .exceptions import APIResponseError
 from .fusion_filesystem import FusionHTTPFileSystem
 from .utils import (
     cpu_count,
+    csv_to_table,
     distribution_to_filename,
     distribution_to_url,
     get_session,
+    is_dataset_raw,
+    json_to_table,
     normalise_dt_param_str,
+    parquet_to_table,
     path_to_url,
     read_csv,
     read_json,
     read_parquet,
-    parquet_to_table,
-    csv_to_table,
-    json_to_table,
     stream_single_file_new_session,
     upload_files,
     validate_file_names,
-    is_dataset_raw,
 )
 
 logger = logging.getLogger(__name__)
@@ -336,8 +337,11 @@ class Fusion:
         if product:
             url = f"{self.root_url}catalogs/{catalog}/productDatasets"
             df_pr = Fusion._call_for_dataframe(url, self.session)
-            df_pr = df_pr[df_pr["product"] == product] if isinstance(product, str) \
+            df_pr = (
+                df_pr[df_pr["product"] == product]
+                if isinstance(product, str)
                 else df_pr[df_pr["product"].isin(product)]
+            )
             df = df[df["identifier"].isin(df_pr["dataset"])].reset_index(drop=True)
 
         if max_results > -1:
@@ -347,15 +351,15 @@ class Fusion:
         df["region"] = df.region.str.join(", ")
         if not display_all_columns:
             cols = [
-                    "identifier",
-                    "title",
-                    "containerType",
-                    "region",
-                    "category",
-                    "coverageStartDate",
-                    "coverageEndDate",
-                    "description",
-                ]
+                "identifier",
+                "title",
+                "containerType",
+                "region",
+                "category",
+                "coverageStartDate",
+                "coverageEndDate",
+                "description",
+            ]
             cols = [c for c in cols if c in df.columns]
             df = df[cols]
 
@@ -416,7 +420,16 @@ class Fusion:
         )
 
         if not display_all_columns:
-            df = df[["identifier", "title", "dataType", "isDatasetKey", "description", "source"]]
+            df = df[
+                [
+                    "identifier",
+                    "title",
+                    "dataType",
+                    "isDatasetKey",
+                    "description",
+                    "source",
+                ]
+            ]
 
         if output:
             print(tabulate(df, headers="keys", tablefmt="psql", maxcolwidths=30))
@@ -889,7 +902,7 @@ class Fusion:
         show_progress: bool = True,
         return_paths: bool = False,
         multipart=True,
-        chunk_size=5 * 2 ** 20,
+        chunk_size=5 * 2**20,
     ):
         """Uploads the requested files/files to Fusion.
 

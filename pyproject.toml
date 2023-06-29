@@ -26,86 +26,50 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<4.0"
-
 requests = ">2.27.0"
-types-requests = ">2.27.0"
 pandas = ">1.1.1"
 joblib = ">=1.1.0"
 tabulate = ">=0.8.10"
-types-tabulate = ">=0.8.8"
 tqdm = ">=4.64.0"
 pyarrow = ">=4.0"
 fsspec = ">=2021.6.1"
 aiohttp = ">=3.7.1"
 
 [tool.poetry.group.dev.dependencies]
-patchelf = "^0.17.2.1"
-markupsafe = { version = ">=2.0.1", optional = true}
-jinja2 = { version = ">2.0.0", optional = true}
-black  = { version = ">=22.3.0", optional = true}
-isort  = { version = ">=5.8.0", optional = true}
-flake8  = { version = ">=3.9.2", optional = true}
-flake8-docstrings = { version = ">=1.6.0", optional = true }
-mypy = {version = "^0.900", optional = true}
-pytest  = { version = ">=6.2.4", optional = true}
-pytest-cov  = { version = ">=2.12.0", optional = true}
-tox  = { version = ">=3.20.1", optional = true}
-tox-conda = {version = ">=0.8.2", optional = true}
-virtualenv  = { version = ">=20.2.2", optional = true}
-pip  = { version = ">=22.3.1", optional = true}
-mkdocs = {version = ">=1.2.4", optional = true}
-mkdocs-material = {version = ">=8.1.0", optional = true}
-mkdocs-material-extensions = {version=">=1.0.1",optional=true}
-mkdocstrings = { version = ">=0.16.0", optional = true, extras=["python"]}
-mkdocs-autorefs = {version = ">=0.2.1", optional = true}
-mkdocs-include-markdown-plugin = {version = ">=2.8.0", optional=true}
-mkdocs-git-revision-date-plugin = {version = ">=0.3.1", optional = true}
-mkdocs-jupyter = {version = ">=0.22.0", optional = true}
-jupyter_contrib_nbextensions = {version = ">=0.7.0", optional = true}
-mike = {version = ">=1.1.2", optional = true}
-twine  = { version = "^3.3.0", optional = true}
-pre-commit = {version = "^2.12.0", optional = true}
-toml = {version = "^0.10.2", optional = true}
-bump2version = {version = "^1.0.1", optional = true}
+types-requests = ">2.27.0"
+types-tabulate = ">=0.8.8"
+#patchelf = "^0.17.2.1"
+markupsafe = ">=2.0.1"
+jinja2 = ">2.0.0"
+black = ">=22.3.0"
+isort = ">=5.8.0"
+flake8 = ">=3.9.2"
+flake8-docstrings = ">=1.6.0"
+mypy = "0.900"
+pytest = ">=6.2.4"
+pytest-cov = ">=2.12.0"
+tox  = ">=3.20.1"
+tox-conda = ">=0.8.2"
+virtualenv = ">=20.2.2"
+pip = ">=22.3.1"
+mkdocs = ">=1.2.4"
+mkdocs-material = ">=8.1.0"
+mkdocs-material-extensions = ">=1.0.1"
+mkdocstrings = { version = ">=0.16.0", extras=["python"]}
+mkdocs-autorefs = { version = ">=0.2.1" }
+mkdocs-include-markdown-plugin = { version = ">=2.8.0" }
+mkdocs-git-revision-date-plugin = { version = ">=0.3.1" }
+mkdocs-jupyter = {version = ">=0.22.0" }
+jupyter_contrib_nbextensions = { version = ">=0.7.0"}
+mike = { version = ">=1.1.2" }
+twine  = { version = "^3.3.0" }
+pre-commit = { version = "^2.12.0" }
+toml = { version = "^0.10.2" }
+bump2version = { version = "^1.0.1" }
+maturin = "^1.1.0"
 
 
 [tool.poetry.extras]
-test = [
-    "pytest",
-    "black",
-    "isort",
-    "mypy",
-    "flake8",
-    "flake8-docstrings",
-    "pytest-cov"
-    ]
-
-dev = [
-    "pytest",
-    "pytest-cov",
-    "tox",
-    "tox-conda",
-    "pre-commit",
-    "virtualenv",
-    "pip",
-    "twine",
-    "toml",
-    "bump2version"
-    ]
-
-doc = [
-    "mkdocs",
-    "mkdocs-material",
-    "mkdocstrings",
-    "mkdocs-material-extension",
-    "mkdocs-autorefs",
-    "mkdocs-include-markdown-plugin",
-    "mkdocs-git-revision-date-plugin",
-    "mkdocs-jupyter",
-    "jupyter_contrib_nbextensions",
-    "mike"
-    ]
-
 aws = [
     "s3fs"
 ]
@@ -117,7 +81,6 @@ gcs = [
 azr = [
     "adlfs"
 ]
-
 
 
 [tool.isort]

@@ -1,17 +1,17 @@
 """Fusion utilities."""
 
 import datetime
-from datetime import timedelta
+import json as js
 import logging
 import os
 import re
 import sys
+from datetime import timedelta
 from pathlib import Path
 from typing import Union
 from urllib.parse import urlparse, urlunparse
 
 import aiohttp
-import json as js
 import pandas as pd
 import pyarrow.parquet as pq
 import requests
@@ -46,13 +46,13 @@ import multiprocessing as mp
 import fsspec
 from urllib3.util.retry import Retry
 
-from .authentication import FusionCredentials, FusionOAuthAdapter, FusionAiohttpSession
+from .authentication import FusionAiohttpSession, FusionCredentials, FusionOAuthAdapter
 
 logger = logging.getLogger(__name__)
 VERBOSE_LVL = 25
 DT_YYYYMMDD_RE = re.compile(r"^(\d{4})(\d{2})(\d{2})$")
 DT_YYYY_MM_DD_RE = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})$")
-DEFAULT_CHUNK_SIZE = 2 ** 16
+DEFAULT_CHUNK_SIZE = 2**16
 DEFAULT_THREAD_POOL_SIZE = 5
 
 
@@ -91,7 +91,7 @@ def csv_to_table(path: str, fs=None, columns: list = None, filters: list = None)
     """
     # parse_options = csv.ParseOptions(delimiter=delimiter)
     filters = filters_to_expression(filters) if filters else filters
-    with (fs.open(path) if fs else nullcontext(path)) as f:
+    with fs.open(path) if fs else nullcontext(path) as f:
         tbl = csv.read_csv(f)
         if filters is not None:
             tbl = tbl.filter(filters)
@@ -113,7 +113,7 @@ def json_to_table(path: str, fs=None, columns: list = None, filters: list = None
         class:`pyarrow.Table` pyarrow table with the data.
     """
     filters = filters_to_expression(filters) if filters else filters
-    with (fs.open(path) if fs else nullcontext(path)) as f:
+    with fs.open(path) if fs else nullcontext(path) as f:
         tbl = json.read_json(f)
         if filters is not None:
             tbl = tbl.filter(filters)
@@ -198,7 +198,7 @@ def read_csv(path: str, columns: list = None, filters: list = None, fs=None):
             f"Trying with pandas csv reader. {err}",
         )
         try:
-            with (fs.open(path) if fs else nullcontext(path)) as f:
+            with fs.open(path) if fs else nullcontext(path) as f:
                 res = pd.read_csv(f, usecols=columns, index_col=False)
         except Exception as err:
             logger.log(
@@ -206,7 +206,7 @@ def read_csv(path: str, columns: list = None, filters: list = None, fs=None):
                 f"Could not parse {path} properly. "
                 f"Trying with pandas csv reader pandas engine. {err}",
             )
-            with (fs.open(path) if fs else nullcontext(path)) as f:
+            with fs.open(path) if fs else nullcontext(path) as f:
                 res = pd.read_table(
                     f, usecols=columns, index_col=False, engine="python", delimiter=None
                 )
@@ -243,7 +243,7 @@ def read_json(path: str, columns: list = None, filters: list = None, fs=None):
             f"Trying with pandas json reader. {err}",
         )
         try:
-            with (fs.open(path) if fs else nullcontext(path)) as f:
+            with fs.open(path) if fs else nullcontext(path) as f:
                 res = pd.read_json(f)
         except Exception as err:
             logger.error(
@@ -776,7 +776,7 @@ def upload_files(
     parallel=True,
     n_par=-1,
     multipart=True,
-    chunk_size=5 * 2 ** 20,
+    chunk_size=5 * 2**20,
 ):
     """Upload file into Fusion.
 
